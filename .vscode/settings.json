@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "cerrno": "cpp"
+        "cerrno": "cpp",
+        "random": "cpp"
     }
 }

@@ -1,15 +1,8 @@
 #include "syscall_wrapper.h"
-#include <fstream>
-#include <random>
-#include <string>
+#include "random_row.h"
+#include "table_type.h"
 
 #define N 100  // initial row numbers
-
-
-typedef unsigned long column;
-typedef struct row {column r[100];} row;
-
-row rand_row_generate();
 
 // Write 100 random rows to file
 int main() {  
@@ -31,15 +24,4 @@ int main() {
     ssize_t nbytes_r = Read(fd, &output, 800);
     Close(fd);
     return 0;
-}
-
-row rand_row_generate() {
-    std::random_device dev;
-    std::uniform_int_distribution<unsigned long> randnum(0, UINT64_MAX);  // Adjust random range here
-    std::mt19937 rng(dev());
-    row random_row;
-    for (int i = 0; i<100; i++) {
-        random_row.r[i] = randnum(rng);
-    }
-    return random_row;
 }
