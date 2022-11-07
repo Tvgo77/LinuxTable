@@ -1,9 +1,9 @@
 #include "syscall_wrapper.h"
 #include "random_row.h"
 #include "table_type.h"
+#include "predefined.h"
 #include <vector>
 
-#define N_ROWS 100  // Read N_ROWS rows in each read system call
 
 void add_row(row r) {
     int fd = Open("./table/table", O_RDWR, 0);
@@ -34,7 +34,7 @@ void search_row(int column_num, column left_val, column right_val, std::vector<r
 }
 
 int main() {
-    row r = {0, 5, 0};
+    row r = {10UL, 5UL, 5UL};
     add_row(r);
 
     // Read last row
@@ -45,6 +45,6 @@ int main() {
     int rc = Close(fd);
 
     std::vector<row> result;
-    search_row(1, 4UL, 6UL, result);
+    search_row(0, 9UL, 11UL, result);
     return 0;
 }

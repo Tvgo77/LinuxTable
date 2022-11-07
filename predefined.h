@@ -7,6 +7,7 @@ namespace bpt {
 
 /* predefined B+ info */
 #define BP_ORDER 20
+#define N_ROWS 100
 
 /* key/value type */
 typedef off_t value_t;

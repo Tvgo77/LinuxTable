@@ -8,7 +8,7 @@
                 "-fdiagnostics-color=always",
                 "-I", "./",
                 "-g",
-                "${file}", "bpt.cc", "syscall_wrapper.cpp",
+                "${file}", "bpt.cc", "syscall_wrapper.cpp", "random_row.cpp",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],
