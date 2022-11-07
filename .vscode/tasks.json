@@ -6,9 +6,9 @@
             "command": "/usr/bin/g++",
             "args": [
                 "-fdiagnostics-color=always",
-                "-I", "../",
+                "-I", "./",
                 "-g",
-                "${file}", "syscall_wrapper.cpp",
+                "${file}", "bpt.cc", "syscall_wrapper.cpp",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],
