@@ -1,17 +1,21 @@
+#pragma once
+
 #ifndef PREDEFINED_H
 #define PREDEFINED_H
 
 #include <string.h>
 
-namespace bpt {
+/* num of rows processed per r/w IO*/
+#define N_ROWS 100
 
 /* predefined B+ info */
 #define BP_ORDER 20
-#define N_ROWS 100
 
 /* key/value type */
 typedef off_t value_t;
-typedef unsigned long key_t;
+typedef unsigned long key_type;
+
+static bool attributes[100] = {};
 // struct key_t {
 //     char k[16];
 
@@ -45,6 +49,5 @@ typedef unsigned long key_t;
         return l.key == r;\
     }
 
-}
 
 #endif /* end of PREDEFINED_H */

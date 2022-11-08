@@ -5,14 +5,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <vector>
 
 #ifndef UNIT_TEST
 #include "predefined.h"
-#else
-#include "util/unit_test_predefined.h"
 #endif
 
-namespace bpt {
 
 /* offsets */
 #define OFFSET_META 0
@@ -34,7 +32,7 @@ typedef struct {
 
 /* internal nodes' index segment */
 struct index_t {
-    key_t key;
+    key_type key;
     off_t child; /* child's offset */
 };
 
@@ -53,7 +51,7 @@ struct internal_node_t {
 
 /* the final record of value */
 struct record_t {
-    key_t key;
+    key_type key;
     value_t value;
 };
 
@@ -74,12 +72,12 @@ public:
     bplus_tree(const char *path, bool force_empty = false);
 
     /* abstract operations */
-    int search(const key_t& key, value_t *value) const;
-    int search_range(key_t &left, key_t &right,
-                             value_t *values, size_t max, bool *next = NULL) const;
-    int remove(const key_t& key);
-    int insert(const key_t& key, value_t value);
-    int update(const key_t& key, value_t value);
+    int search(const key_type& key, value_t *value) const;
+    int search_range(key_type &left, key_type &right,
+                             std::vector<value_t> &values, size_t max, bool *next = NULL) const;
+    int remove(const key_type& key);
+    int insert(const key_type& key, value_t value);
+    int update(const key_type& key, value_t value);
     meta_t get_meta() const {
         return meta;
     };
@@ -96,25 +94,25 @@ public:
     void init_from_empty();
 
     /* find index */
-    off_t search_index(const key_t &key) const;
+    off_t search_index(const key_type &key) const;
 
     /* find leaf */
-    off_t search_leaf(off_t index, const key_t &key) const;
-    off_t search_leaf(const key_t &key) const
+    off_t search_leaf(off_t index, const key_type &key) const;
+    off_t search_leaf(const key_type &key) const
     {
         return search_leaf(search_index(key), key);
     }
 
     /* find leaf lower bound*/
-    off_t search_leaf_low(off_t index, const key_t &key) const;
-    off_t search_leaf_low(const key_t &key) const
+    off_t search_leaf_low(off_t index, const key_type &key) const;
+    off_t search_leaf_low(const key_type &key) const
     {
         return search_leaf_low(search_index(key), key);
     }
 
     /* remove internal node */
     void remove_from_index(off_t offset, internal_node_t &node,
-                           const key_t &key);
+                           const key_type &key);
 
     /* borrow one key from other internal node */
     bool borrow_key(bool from_right, internal_node_t &borrower,
@@ -124,7 +122,7 @@ public:
     bool borrow_key(bool from_right, leaf_node_t &borrower);
 
     /* change one's parent key to another key */
-    void change_parent_child(off_t parent, const key_t &o, const key_t &n);
+    void change_parent_child(off_t parent, const key_type &o, const key_type &n);
 
     /* merge right leaf to left leaf */
     void merge_leafs(leaf_node_t *left, leaf_node_t *right);
@@ -134,12 +132,12 @@ public:
 
     /* insert into leaf without split */
     void insert_record_no_split(leaf_node_t *leaf,
-                                const key_t &key, const value_t &value);
+                                const key_type &key, const value_t &value);
 
     /* add key to the internal node */
-    void insert_key_to_index(off_t offset, const key_t &key,
+    void insert_key_typeo_index(off_t offset, const key_type &key,
                              off_t value, off_t after);
-    void insert_key_to_index_no_split(internal_node_t &node, const key_t &key,
+    void insert_key_typeo_index_no_split(internal_node_t &node, const key_type &key,
                                       off_t value);
 
     /* change children's parent */
@@ -239,6 +237,5 @@ public:
     }
 };
 
-}
 
 #endif /* end of BPT_H */
