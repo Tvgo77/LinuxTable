@@ -10,8 +10,9 @@ using std::string;
 using std::vector;
 
 // Add a row and insert index to existed b+ tree
-void add_row(row r, const bool * p_attribute = attributes) {
-    int fd = Open("./table/table", O_RDWR, 0);
+void add_row(row r, const bool * p_attribute = attributes, 
+                    const char * path = "./table/table") {
+    int fd = Open(path, O_RDWR, 0);
     off_t offset_w = Lseek(fd, 0L, SEEK_END);
     ssize_t nbytes_w = Write(fd, &r, 800);
     int rc = Close(fd);
@@ -28,14 +29,15 @@ void add_row(row r, const bool * p_attribute = attributes) {
 
 // Search all rows with column value in [left_val, right_val] in which attribute is denoted by column_num 
 void search_row(int column_num, column left_val, column right_val, 
-                std::vector<row> &result, const bool * p_attribute = attributes) {
+                std::vector<row> &result, const bool * p_attribute = attributes,
+                const char *path = "./table/table") {
     if (column_num < 0 || column_num > 99) {
         printf("%s", "Invalid column number. The column number must be in 0~99.");
         return;
     }
 
     if (!p_attribute[column_num]) {
-        int fd = Open("./table/table", O_RDONLY, 0);
+        int fd = Open(path, O_RDONLY, 0);
         row buf[N_ROWS];
         ssize_t nbytes_r;
         while((nbytes_r = Read(fd, buf, 800*N_ROWS)) > 0) {
@@ -47,6 +49,7 @@ void search_row(int column_num, column left_val, column right_val,
                     result.push_back(buf[i]);
             }
         }
+        Close(fd);
     }
 
     else {
@@ -55,10 +58,13 @@ void search_row(int column_num, column left_val, column right_val,
         vector<value_t> values;
         bt.search_range(left_val, right_val, values, 10UL);
 
-        int fd = Open("./table/table", O_RDONLY, 0);
-        row output;
-        off_t offset = Lseek(fd, values[0], SEEK_SET);
-        ssize_t nbytes_r = Read(fd, &output, 800);
+        int fd = Open(path, O_RDONLY, 0);
+        for (int i = 0; i < values.size(); i++) {
+            row output;
+            off_t offset = Lseek(fd, values[0], SEEK_SET);
+            ssize_t nbytes_r = Read(fd, &output, 800);
+            result.push_back(output);
+        }
         int rc = Close(fd);
     }
     return;
@@ -105,16 +111,21 @@ void index_construct(int attribute_idx, bool * p_attribute = attributes) {
         }
         total_bytes_r += nbytes_r;
     }
+    Close(fd);
     return;
 }
 
 int main() {
-    table_construct();
-    row r = {10UL, 5UL, 5UL};
-    add_row(r);
+    // table_construct();
+    // index_construct(0);
 
-    index_construct(0);
+    // row r0 = {10UL, 5UL, 5UL};
+    // row r1 = {10UL, 5UL, 5UL};
+    // add_row(r0);
+    // add_row(r1);
 
+
+    index_construct(2);
     // Read last row
     int fd = Open("./table/table", O_RDONLY, 0);
     row output;
@@ -123,6 +134,6 @@ int main() {
     int rc = Close(fd);
 
     std::vector<row> result;
-    search_row(0, 9UL, 11UL, result);
+    search_row(2, 5UL, 5UL, result);
     return 0;
 }
