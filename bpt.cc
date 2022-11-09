@@ -60,37 +60,24 @@ bplus_tree::bplus_tree(const char *p, bool force_empty)
     }
 }
 
-int bplus_tree::search(const key_type& key, value_t *value) const
-{
-    leaf_node_t leaf;
-    map(&leaf, search_leaf(key));
-
-    // finding the record
-    record_t *record = find(leaf, key);
-    if (record != leaf.children + leaf.n) {
-        // always return the lower bound
-        *value = record->value;
-
-        // return keycmp(record->key, key);
-        return record->key > key;
-    } else {
-        return -1;
-    }
-}
-
+/*  Search through the b+ tree where key value in range [left, right].
+    Push back results to values and maximum num of results is size_t max 
+*/
 int bplus_tree::search_range(key_type &left, key_type &right,
                              vector<value_t> &values, size_t max, bool *next) const
 {
     if (left == 0 || left > right)  //keycmp(*left, right) > 0)
         return -1;
 
-    off_t off_left = search_leaf(left);
-    off_t off_right = search_leaf(right);
+    off_t off_left = search_leaf(left);  // leaf node offset of left key value
+    off_t off_right = search_leaf(right);  // leaf node offset of right key value
     off_t off = off_left;
     size_t i = 0;
-    record_t *b, *e;
+    record_t *b, *e;  // b for begin, e for end
 
     leaf_node_t leaf;
+
+    /* Travel through leaf node*/
     while (off != off_right && off != 0 && i < max) {
         map(&leaf, off);
 
@@ -601,6 +588,7 @@ void bplus_tree::reset_index_children_parent(index_t *begin, index_t *end,
     }
 }
 
+/* Travel through b+ tree from root to parent of leaf, where height of node > 1*/
 off_t bplus_tree::search_index(const key_type &key) const
 {
     off_t org = meta.root_offset;
@@ -619,21 +607,14 @@ off_t bplus_tree::search_index(const key_type &key) const
     return org;
 }
 
+
+/* Search leaf node of key value, index belongs to the parent of leaf node*/
 off_t bplus_tree::search_leaf(off_t index, const key_type &key) const
 {
     internal_node_t node;
     map(&node, index);
 
     index_t *i = upper_bound(begin(node), end(node)-1, key);
-    return i->child;
-}
-
-off_t bplus_tree::search_leaf_low(off_t index, const key_type &key) const
-{
-    internal_node_t node;
-    map(&node, index);
-
-    index_t *i = lower_bound(begin(node), end(node) - 1, key);
     return i->child;
 }
 
@@ -695,5 +676,3 @@ void bplus_tree::init_from_empty()
     unmap(&root, meta.root_offset);
     unmap(&leaf, root.children[0].child);
 }
-
-

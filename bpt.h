@@ -71,8 +71,7 @@ class bplus_tree {
 public:
     bplus_tree(const char *path, bool force_empty = false);
 
-    /* abstract operations */
-    int search(const key_type& key, value_t *value) const;
+    /* Search the  */
     int search_range(key_type &left, key_type &right,
                              std::vector<value_t> &values, size_t max, bool *next = NULL) const;
     int remove(const key_type& key);
@@ -82,11 +81,7 @@ public:
         return meta;
     };
 
-#ifndef UNIT_TEST
 private:
-#else
-public:
-#endif
     char path[512];
     meta_t meta;
 
@@ -101,13 +96,6 @@ public:
     off_t search_leaf(const key_type &key) const
     {
         return search_leaf(search_index(key), key);
-    }
-
-    /* find leaf lower bound*/
-    off_t search_leaf_low(off_t index, const key_type &key) const;
-    off_t search_leaf_low(const key_type &key) const
-    {
-        return search_leaf_low(search_index(key), key);
     }
 
     /* remove internal node */

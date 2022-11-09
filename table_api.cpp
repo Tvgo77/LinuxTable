@@ -1,13 +1,36 @@
 #include "syscall_wrapper.h"
 #include "predefined.h"
-#include "bpt1.h"
+#include "bpt.h"
 #include <random>
 #include <sys/stat.h>
 #include <vector>
 #include <string>
+#include <pthread.h> 
 
 using std::string;
 using std::vector;
+
+
+/*  Shared value or File:
+        static bool attributes[100]
+        ./table/table
+        ./table/index
+
+    API which read the shared resource:
+        search_row()  // read table and index
+        index_construct()  // read index
+        add_row()  // read index
+
+    API which write to the shared resource:
+        add_row()  // write to table and index
+        index_construct()  // write to attributes and index
+
+    Strategy:
+        lock write and read when writes to shared resource
+        lock write when read shared resource
+*/
+
+pthread_rwlock_t rwlock;
 
 // Generate a random row
 row rand_row_generate() {
@@ -21,7 +44,7 @@ row rand_row_generate() {
     return random_row;
 }
 
-// Add a row and insert index to existing b+ tree
+// Add a row and insert its index to existing b+ tree file
 void add_row(row r, const bool * p_attribute = attributes, 
                     const char * path = "./table/table") {
     int fd = Open(path, O_RDWR, 0);
