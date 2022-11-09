@@ -19,6 +19,7 @@
         lock write when read shared resource
 */
 
+pthread_rwlock_t rwlock;
 
 // Generate a random row
 row rand_row_generate() {
@@ -33,8 +34,7 @@ row rand_row_generate() {
 }
 
 // Add a row and insert its index to existing b+ tree file
-void add_row(row r, const bool * p_attribute = attributes, 
-                    const char * path = "./table/table") {
+void add_row(row r, const bool * p_attribute, const char * path) {
     // Write to table file
     pthread_rwlock_wrlock(&rwlock);
     int fd = Open(path, O_RDWR, 0);
@@ -59,8 +59,8 @@ void add_row(row r, const bool * p_attribute = attributes,
 
 // Search all rows with column value in [left_val, right_val] in which attribute is denoted by column_num 
 void search_row(int column_num, column left_val, column right_val, 
-                std::vector<row> &result, const bool * p_attribute = attributes,
-                const char *path = "./table/table") {
+                std::vector<row> &result, const bool * p_attribute,
+                const char *path) {
     if (column_num < 0 || column_num > 99) {
         printf("%s", "Invalid column number. The column number must be in 0~99.");
         return;
@@ -109,7 +109,7 @@ void search_row(int column_num, column left_val, column right_val,
 
 
 // Construct table with random value
-void table_construct(const char *path = "./table/table") {
+void table_construct(const char *path) {
     row random_rows[N_ROWS];
     size_t total_rows = 0;
     
@@ -126,7 +126,7 @@ void table_construct(const char *path = "./table/table") {
 }
 
 // Create index file of attributes, attribute_idx indicates the specific attribute
-void index_construct(int attribute_idx, bool * p_attribute = attributes) {
+void index_construct(int attribute_idx, bool * p_attribute) {
     if (attribute_idx < 0 || attribute_idx > 99) {
         printf("%s\n", "Attribute index must be in [0, 99]");
         return;
@@ -162,44 +162,44 @@ void index_construct(int attribute_idx, bool * p_attribute = attributes) {
 }
 
 // initialize the global variable attributes
-void init_attributes() {
+void init_attributes(bool * p_attributes) {
     for (int i = 0; i<100; i++) {
         string index_path = string("./table/index") + std::to_string(i);
         struct stat buffer;
         int rc;
         if ((rc = stat(index_path.c_str(), &buffer)) == 0) 
-            attributes[i] = true;
+            p_attributes[i] = true;
     }
 }
 
-int main() {
-    for (int i = 0; i<100; i++) {
-        string index_path = string("./table/index") + std::to_string(i);
-        struct stat buffer;
-        int rc;
-        if ((rc = stat(index_path.c_str(), &buffer)) == 0) 
-            attributes[i] = true;
-    }
+// int main() {
+//     for (int i = 0; i<100; i++) {
+//         string index_path = string("./table/index") + std::to_string(i);
+//         struct stat buffer;
+//         int rc;
+//         if ((rc = stat(index_path.c_str(), &buffer)) == 0) 
+//             attributes[i] = true;
+//     }
    
-    // table_construct();
-    index_construct(0);
+//     // table_construct();
+//     index_construct(0);
 
-    // row r0 = {10UL, 5UL, 5UL};
-    // row r1 = {13847849828835443318UL, 5UL, 5UL};
-    // add_row(r0);
-    // add_row(r1);
+//     // row r0 = {10UL, 5UL, 5UL};
+//     // row r1 = {13847849828835443318UL, 5UL, 5UL};
+//     // add_row(r0);
+//     // add_row(r1);
 
 
-    // index_construct(0);
+//     // index_construct(0);
 
-    // Read a certain row
-    int fd = Open("./table/table", O_RDONLY, 0);
-    row output;
-    off_t offset = Lseek(fd, 4000000, SEEK_SET);
-    ssize_t nbytes_r = Read(fd, &output, 800);
-    Close(fd);
+//     // Read a certain row
+//     int fd = Open("./table/table", O_RDONLY, 0);
+//     row output;
+//     off_t offset = Lseek(fd, 4000000, SEEK_SET);
+//     ssize_t nbytes_r = Read(fd, &output, 800);
+//     Close(fd);
 
-    std::vector<row> result;
-    search_row(0, 6768528264644406733UL, 6768528264644406733UL, result);
-    return 0;
-}
+//     std::vector<row> result;
+//     search_row(0, 6768528264644406733UL, 6768528264644406733UL, result);
+//     return 0;
+// }
