@@ -47,17 +47,24 @@ row rand_row_generate() {
 // Add a row and insert its index to existing b+ tree file
 void add_row(row r, const bool * p_attribute = attributes, 
                     const char * path = "./table/table") {
+    // Write to table file
+    pthread_rwlock_wrlock(&rwlock);
     int fd = Open(path, O_RDWR, 0);
     off_t offset_w = Lseek(fd, 0L, SEEK_END);
     ssize_t nbytes_w = Write(fd, &r, 800);
     int rc = Close(fd);
+    pthread_rwlock_unlock(&rwlock);
 
     for (int i = 0; i < 100; i++) {
         if (p_attribute[i]) {
             string index_path = string("./table/index") + std::to_string(i);
+
+            // Write to index file
+            pthread_rwlock_wrlock(&rwlock);
             bplus_tree bt(index_path.c_str());
             column * p_col = (column*) &r;
             bt.insert(p_col[i], offset_w);
+            pthread_rwlock_unlock(&rwlock);
         }
     }
 }
@@ -72,6 +79,9 @@ void search_row(int column_num, column left_val, column right_val,
     }
 
     if (!p_attribute[column_num]) {
+
+        // Read table file
+        pthread_rwlock_rdlock(&rwlock);
         int fd = Open(path, O_RDONLY, 0);
         row buf[N_ROWS];
         ssize_t nbytes_r;
@@ -85,14 +95,17 @@ void search_row(int column_num, column left_val, column right_val,
             }
         }
         Close(fd);
+        pthread_rwlock_unlock(&rwlock);
     }
 
     else {
         string index_path = string("./table/index") + std::to_string(column_num);
         bplus_tree bt(index_path.c_str());
         vector<value_t> values;
-        bt.search_range(left_val, right_val, values, 10UL);
 
+        // Read index file and table file
+        pthread_rwlock_rdlock(&rwlock);
+        bt.search_range(left_val, right_val, values, 10UL);
         int fd = Open(path, O_RDONLY, 0);
         for (int i = 0; i < values.size(); i++) {
             row output;
@@ -101,6 +114,7 @@ void search_row(int column_num, column left_val, column right_val,
             result.push_back(output);
         }
         int rc = Close(fd);
+        pthread_rwlock_unlock(&rwlock);
     }
     return;
 }
@@ -117,7 +131,6 @@ void table_construct(const char *path = "./table/table") {
         ssize_t nbytes_w = Write(fd, &random_rows, 800*N_ROWS);
         total_rows += N_ROWS;
     }
-
     Close(fd);
     return;
 }
@@ -128,9 +141,15 @@ void index_construct(int attribute_idx, bool * p_attribute = attributes) {
         return;
     }
 
+    // Write to attributes
+    pthread_rwlock_wrlock(&rwlock);
     p_attribute[attribute_idx] = 1;
+    pthread_rwlock_unlock(&rwlock);
 
     string index_path = string("./table/index") + std::to_string(attribute_idx);
+
+    // Create (Write to) index file
+    pthread_rwlock_wrlock(&rwlock);
     bplus_tree bt(index_path.c_str(), true);
     int fd = Open("./table/table", O_RDONLY, 0);
     row buf[N_ROWS];
@@ -147,6 +166,7 @@ void index_construct(int attribute_idx, bool * p_attribute = attributes) {
         total_bytes_r += nbytes_r;
     }
     Close(fd);
+    pthread_rwlock_unlock(&rwlock);
     return;
 }
 
