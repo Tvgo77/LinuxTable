@@ -16,36 +16,22 @@ typedef off_t value_t;
 typedef unsigned long key_type;
 
 static bool attributes[100] = {};
-// struct key_t {
-//     char k[16];
 
-//     key_t(const char *str = "")
-//     {
-//         bzero(k, sizeof(k));
-//         strcpy(k, str);
-//     }
-
-//     operator bool() const {
-//         return strcmp(k, "");
-//     }
-// };
-
-// inline int keycmp(const key_t &a, const key_t &b) {
-//     int x = strlen(a.k) - strlen(b.k);
-//     return x == 0 ? strcmp(a.k, b.k) : x;
-// }
+/* type of colum and row*/
+typedef unsigned long column;
+typedef struct row {column r[100];} row;
 
 #define OPERATOR_KEYCMP(type) \
-    bool operator< (const key_t &l, const type &r) {\
+    bool operator< (const key_type &l, const type &r) {\
         return l < r.key;\
     }\
-    bool operator< (const type &l, const key_t &r) {\
+    bool operator< (const type &l, const key_type &r) {\
         return l.key < r;\
     }\
-    bool operator== (const key_t &l, const type &r) {\
+    bool operator== (const key_type &l, const type &r) {\
         return l == r.key;\
     }\
-    bool operator== (const type &l, const key_t &r) {\
+    bool operator== (const type &l, const key_type &r) {\
         return l.key == r;\
     }
 

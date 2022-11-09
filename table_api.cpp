@@ -1,15 +1,27 @@
 #include "syscall_wrapper.h"
-#include "random_row.h"
-#include "table_type.h"
 #include "predefined.h"
 #include "bpt1.h"
+#include <random>
+#include <sys/stat.h>
 #include <vector>
 #include <string>
 
 using std::string;
 using std::vector;
 
-// Add a row and insert index to existed b+ tree
+// Generate a random row
+row rand_row_generate() {
+    std::random_device dev;
+    std::uniform_int_distribution<unsigned long> randnum(1, UINT64_MAX);  // Adjust random range here
+    std::mt19937 rng(dev());
+    row random_row;
+    for (int i = 0; i<100; i++) {
+        random_row.r[i] = randnum(rng);
+    }
+    return random_row;
+}
+
+// Add a row and insert index to existing b+ tree
 void add_row(row r, const bool * p_attribute = attributes, 
                     const char * path = "./table/table") {
     int fd = Open(path, O_RDWR, 0);
@@ -116,24 +128,33 @@ void index_construct(int attribute_idx, bool * p_attribute = attributes) {
 }
 
 int main() {
+    for (int i = 0; i<100; i++) {
+        string index_path = string("./table/index") + std::to_string(i);
+        struct stat buffer;
+        int rc;
+        if ((rc = stat(index_path.c_str(), &buffer)) == 0) 
+            attributes[i] = true;
+    }
+   
     // table_construct();
-    // index_construct(0);
+    index_construct(0);
 
     // row r0 = {10UL, 5UL, 5UL};
-    // row r1 = {10UL, 5UL, 5UL};
+    // row r1 = {13847849828835443318UL, 5UL, 5UL};
     // add_row(r0);
     // add_row(r1);
 
 
-    index_construct(2);
-    // Read last row
+    // index_construct(0);
+
+    // Read a certain row
     int fd = Open("./table/table", O_RDONLY, 0);
     row output;
-    off_t offset = Lseek(fd, -800, SEEK_END);
+    off_t offset = Lseek(fd, 4000000, SEEK_SET);
     ssize_t nbytes_r = Read(fd, &output, 800);
-    int rc = Close(fd);
+    Close(fd);
 
     std::vector<row> result;
-    search_row(2, 5UL, 5UL, result);
+    search_row(0, 6768528264644406733UL, 6768528264644406733UL, result);
     return 0;
 }

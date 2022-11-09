@@ -1,15 +1,11 @@
 #include "bpt1.h"
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 
 int main() {
-    bplus_tree bt("./index", false);
-    bt.insert(555UL, 5);
-    bt.insert(555UL, 6);
-    key_type left = 555UL;
-    key_type right = 555UL;
-    std::vector<value_t> values;
-    bt.search_range(left, right, values, 10);
+    int a[5] = {1, 3, 5, 7, 9};
+    void *p = std::lower_bound(std::begin(a), std::end(a), 0);
     return 0;
 }

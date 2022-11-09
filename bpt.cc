@@ -1,4 +1,4 @@
-#include "./bpt1.h"
+#include "bpt.h"
 
 #include <stdlib.h>
 
@@ -605,6 +605,8 @@ off_t bplus_tree::search_index(const key_type &key) const
 {
     off_t org = meta.root_offset;
     int height = meta.height;
+    internal_node_t node;
+    map(&node, org);
     while (height > 1) {
         internal_node_t node;
         map(&node, org);
@@ -622,7 +624,7 @@ off_t bplus_tree::search_leaf(off_t index, const key_type &key) const
     internal_node_t node;
     map(&node, index);
 
-    index_t *i = upper_bound(begin(node), end(node) - 1, key);
+    index_t *i = upper_bound(begin(node), end(node)-1, key);
     return i->child;
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <random>
-#include "table_type.h"
+#include "predefined.h"
 
 row rand_row_generate();
 
