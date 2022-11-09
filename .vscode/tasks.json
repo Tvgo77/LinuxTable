@@ -8,9 +8,10 @@
                 "-fdiagnostics-color=always",
                 "-I", "./",
                 "-g",
-                "${file}", "bpt.cc", "syscall_wrapper.cpp",
+                "${file}", "bpt.cc", "syscall_wrapper.cpp", "table_api.cpp",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "${fileDirname}/${fileBasenameNoExtension}",
+                "-lpthread"
             ],
             "options": {
                 "cwd": "${fileDirname}"

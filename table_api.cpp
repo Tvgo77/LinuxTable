@@ -1,15 +1,4 @@
-#include "syscall_wrapper.h"
-#include "predefined.h"
-#include "bpt.h"
-#include <random>
-#include <sys/stat.h>
-#include <vector>
-#include <string>
-#include <pthread.h> 
-
-using std::string;
-using std::vector;
-
+#include "table_api.h"
 
 /*  Shared value or File:
         static bool attributes[100]
@@ -30,7 +19,6 @@ using std::vector;
         lock write when read shared resource
 */
 
-pthread_rwlock_t rwlock;
 
 // Generate a random row
 row rand_row_generate() {
@@ -119,6 +107,8 @@ void search_row(int column_num, column left_val, column right_val,
     return;
 }
 
+
+// Construct table with random value
 void table_construct(const char *path = "./table/table") {
     row random_rows[N_ROWS];
     size_t total_rows = 0;
@@ -135,6 +125,7 @@ void table_construct(const char *path = "./table/table") {
     return;
 }
 
+// Create index file of attributes, attribute_idx indicates the specific attribute
 void index_construct(int attribute_idx, bool * p_attribute = attributes) {
     if (attribute_idx < 0 || attribute_idx > 99) {
         printf("%s\n", "Attribute index must be in [0, 99]");
@@ -168,6 +159,17 @@ void index_construct(int attribute_idx, bool * p_attribute = attributes) {
     Close(fd);
     pthread_rwlock_unlock(&rwlock);
     return;
+}
+
+// initialize the global variable attributes
+void init_attributes() {
+    for (int i = 0; i<100; i++) {
+        string index_path = string("./table/index") + std::to_string(i);
+        struct stat buffer;
+        int rc;
+        if ((rc = stat(index_path.c_str(), &buffer)) == 0) 
+            attributes[i] = true;
+    }
 }
 
 int main() {
