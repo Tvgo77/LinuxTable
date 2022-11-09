@@ -38,14 +38,24 @@ void *index_construct_thr(void *vargp) {
 int main() {
     pthread_t tid1, tid2;
     init_attributes();
+    
+    add_row({10UL, 5UL, 5UL});
 
-    vector<row> search_result;
-    search_row_para search_row_argp(search_result);
-    search_row_argp.column_num = 0;
-    search_row_argp.left_val = 6768528264644406733UL;
-    search_row_argp.right_val = 6768528264644406733UL;
+    vector<row> search_result1;
+    search_row_para search_row_argp1(search_result1);
+    search_row_argp1.column_num = 0;
+    search_row_argp1.left_val = 6768528264644406733UL;
+    search_row_argp1.right_val = 6768528264644406733UL;
 
-    int rc1 = pthread_create(&tid1, NULL, search_row_thr, (void*)&search_row_argp);
-    int rc2 = pthread_join(tid1, NULL);
+    vector<row> search_result2;
+    search_row_para search_row_argp2(search_result2);
+    search_row_argp2.column_num = 0;
+    search_row_argp2.left_val = 10UL;
+    search_row_argp2.right_val = 10UL;
+
+    int rc1 = pthread_create(&tid1, NULL, search_row_thr, (void*)&search_row_argp1);
+    int rc2 = pthread_create(&tid2, NULL, search_row_thr, (void*)&search_row_argp2);
+    pthread_join(tid1, NULL);
+    pthread_join(tid2, NULL);
     return 0;
 }
