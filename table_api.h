@@ -21,7 +21,7 @@ void add_row(row r, const bool * p_attribute  = attributes, const char * path = 
 
 // Search all rows with column value in [left_val, right_val] in which attribute is denoted by column_num 
 void search_row(int column_num, column left_val, column right_val, 
-                std::vector<row> &result, const bool * p_attribute  = attributes,
+                std::vector<row> &result, size_t max = 10UL, const bool * p_attribute  = attributes,
                 const char *path = "./table/table");
 
 // Construct table with random value

@@ -71,11 +71,21 @@ class bplus_tree {
 public:
     bplus_tree(const char *path, bool force_empty = false);
 
-    /* Search the  */
+    /*  Search through the b+ tree where key value in range [left, right].
+        Push back results to values and maximum num of results is size_t max 
+    */
     int search_range(key_type &left, key_type &right,
                              std::vector<value_t> &values, size_t max, bool *next = NULL) const;
+
+    /*  remove index of value key 
+        NOT NEED IN THIS ASSIGNMENT
+    */
     int remove(const key_type& key);
+
+    /*  Insert new (key, value) pair to b+ tree*/
     int insert(const key_type& key, value_t value);
+
+    /*  Update (key, value) pair */
     int update(const key_type& key, value_t value);
     meta_t get_meta() const {
         return meta;

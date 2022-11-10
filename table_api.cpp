@@ -37,6 +37,7 @@ row rand_row_generate() {
 void add_row(row r, const bool * p_attribute, const char * path) {
     // Write to table file
     pthread_rwlock_wrlock(&rwlock);
+    pause();
     int fd = Open(path, O_RDWR, 0);
     off_t offset_w = Lseek(fd, 0L, SEEK_END);
     ssize_t nbytes_w = Write(fd, &r, 800);
@@ -59,7 +60,7 @@ void add_row(row r, const bool * p_attribute, const char * path) {
 
 // Search all rows with column value in [left_val, right_val] in which attribute is denoted by column_num 
 void search_row(int column_num, column left_val, column right_val, 
-                std::vector<row> &result, const bool * p_attribute,
+                std::vector<row> &result, size_t max, const bool * p_attribute,
                 const char *path) {
     if (column_num < 0 || column_num > 99) {
         printf("%s", "Invalid column number. The column number must be in 0~99.");
@@ -73,6 +74,7 @@ void search_row(int column_num, column left_val, column right_val,
         int fd = Open(path, O_RDONLY, 0);
         row buf[N_ROWS];
         ssize_t nbytes_r;
+        // Travel through whole table to get the result
         while((nbytes_r = Read(fd, buf, 800*N_ROWS)) > 0) {
             int valid_row = nbytes_r/800;
             for (int i = 0; i < valid_row; i++) {
@@ -93,7 +95,7 @@ void search_row(int column_num, column left_val, column right_val,
 
         // Read index file and table file
         pthread_rwlock_rdlock(&rwlock);
-        bt.search_range(left_val, right_val, values, 10UL);
+        bt.search_range(left_val, right_val, values, max);
         int fd = Open(path, O_RDONLY, 0);
         for (int i = 0; i < values.size(); i++) {
             row output;
@@ -113,8 +115,9 @@ void table_construct(const char *path) {
     row random_rows[N_ROWS];
     size_t total_rows = 0;
     
+    // Write N_ROWS rows to table file every while loop
     int fd = Open(path, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
-    while (total_rows < 10000) {
+    while (total_rows < 100000) {
         for (int i = 0; i < N_ROWS; i++) 
             random_rows[i] = rand_row_generate();
         off_t offset_w = Lseek(fd, 0L, SEEK_END);
@@ -152,7 +155,7 @@ void index_construct(int attribute_idx, bool * p_attribute) {
             column *p = (column*) &buf[i];
             column key_column = *(p+attribute_idx);  // First column as index
             off_t row_offset = total_bytes_r + 800*i;
-            bt.insert(key_column, row_offset);
+            bt.insert(key_column, row_offset);  // Write to index file
         }
         total_bytes_r += nbytes_r;
     }

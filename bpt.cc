@@ -203,10 +203,6 @@ int bplus_tree::insert(const key_type& key, value_t value)
     leaf_node_t leaf;
     map(&leaf, offset);
 
-    // check if we have the same key
-    // if (binary_search(begin(leaf), end(leaf), key))
-    //     return 1;
-
     if (leaf.n == meta.order) {
         // split when full
 

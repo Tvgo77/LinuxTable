@@ -9,7 +9,7 @@
 #define N_ROWS 100
 
 /* predefined B+ info */
-#define BP_ORDER 20
+#define BP_ORDER 30
 
 /* key/value type */
 typedef off_t value_t;  // Offset of a row in table file

@@ -1,4 +1,5 @@
 #include "table_api.h"
+#include <chrono>
 
 struct add_row_para {
     row r;
@@ -17,7 +18,7 @@ struct search_row_para {
 void *add_row_thr(void *vargp) {
     add_row_para * args = (add_row_para*) vargp;
     add_row(args->r, args->p_attribute);
-    free(vargp);
+    //free(vargp);
     return NULL;
 }
 
@@ -35,27 +36,90 @@ void *index_construct_thr(void *vargp) {
     return NULL;
 }
 
-int main() {
+void test1() {
+    table_construct();
+}
+
+void test2() {
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration;
+
+    column left_val = 4651581685022161230UL;
+    column right_val = 4651581685022161232UL;
+    std::vector<row> result;
+
+    // Accurate normal search 
+    auto t1 = high_resolution_clock::now();
+    search_row(0, left_val, right_val, result);
+    auto t2 = high_resolution_clock::now();
+    duration<double, std::milli> ms = t2-t1;
+    return;
+}
+
+void test3() {
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration;
+
+    index_construct(0);
+    index_construct(2);
+
+    column left_val = 4651581685022161231UL;
+    column right_val = 4651581685022161231UL;
+    std::vector<row> result;
+
+    // Accurate normal search 
+    auto t1 = high_resolution_clock::now();
+    search_row(0, left_val, right_val, result);
+    auto t2 = high_resolution_clock::now();
+    duration<double, std::milli> ms = t2-t1;
+    return;
+}
+
+void test4() {
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration;
+
+    // find whether an index file exist
+    init_attributes();
+
+    add_row({202222080642UL, 317024848UL, 77UL});
+    
+    column left_val = 202222080642UL;
+    column right_val = 202222080642UL;
+    std::vector<row> result;
+
+    // Accurate normal search 
+    auto t1 = high_resolution_clock::now();
+    search_row(0, left_val, right_val, result);
+    auto t2 = high_resolution_clock::now();
+    duration<double, std::milli> ms = t2-t1;
+    return;
+}
+
+
+void test5() {
     pthread_t tid1, tid2;
     init_attributes();
     
-    add_row({10UL, 5UL, 5UL});
+    // add_row({10UL, 5UL, 5UL});
 
-    vector<row> search_result1;
-    search_row_para search_row_argp1(search_result1);
-    search_row_argp1.column_num = 0;
-    search_row_argp1.left_val = 6768528264644406733UL;
-    search_row_argp1.right_val = 6768528264644406733UL;
+    vector<row> search_result;
+    search_row_para search_row_argp(search_result);
+    search_row_argp.column_num = 0;
+    search_row_argp.left_val = 202222080642UL;
+    search_row_argp.right_val = 202222080642UL;
 
-    vector<row> search_result2;
-    search_row_para search_row_argp2(search_result2);
-    search_row_argp2.column_num = 0;
-    search_row_argp2.left_val = 10UL;
-    search_row_argp2.right_val = 10UL;
+    add_row_para add_row_argp;
+    add_row_argp.r = {123UL, 234UL, 345UL};
 
-    int rc1 = pthread_create(&tid1, NULL, search_row_thr, (void*)&search_row_argp1);
-    int rc2 = pthread_create(&tid2, NULL, search_row_thr, (void*)&search_row_argp2);
+    int rc1 = pthread_create(&tid2, NULL, add_row_thr, (void*)&add_row_argp);
+    int rc2 = pthread_create(&tid1, NULL, search_row_thr, (void*)&search_row_argp);
+
     pthread_join(tid1, NULL);
     pthread_join(tid2, NULL);
-    return 0;
+    return;
+}
+
+int main() {
+    test5();
 }
