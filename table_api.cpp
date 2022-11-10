@@ -37,7 +37,6 @@ row rand_row_generate() {
 void add_row(row r, const bool * p_attribute, const char * path) {
     // Write to table file
     pthread_rwlock_wrlock(&rwlock);
-    pause();
     int fd = Open(path, O_RDWR, 0);
     off_t offset_w = Lseek(fd, 0L, SEEK_END);
     ssize_t nbytes_w = Write(fd, &r, 800);
@@ -174,35 +173,3 @@ void init_attributes(bool * p_attributes) {
             p_attributes[i] = true;
     }
 }
-
-// int main() {
-//     for (int i = 0; i<100; i++) {
-//         string index_path = string("./table/index") + std::to_string(i);
-//         struct stat buffer;
-//         int rc;
-//         if ((rc = stat(index_path.c_str(), &buffer)) == 0) 
-//             attributes[i] = true;
-//     }
-   
-//     // table_construct();
-//     index_construct(0);
-
-//     // row r0 = {10UL, 5UL, 5UL};
-//     // row r1 = {13847849828835443318UL, 5UL, 5UL};
-//     // add_row(r0);
-//     // add_row(r1);
-
-
-//     // index_construct(0);
-
-//     // Read a certain row
-//     int fd = Open("./table/table", O_RDONLY, 0);
-//     row output;
-//     off_t offset = Lseek(fd, 4000000, SEEK_SET);
-//     ssize_t nbytes_r = Read(fd, &output, 800);
-//     Close(fd);
-
-//     std::vector<row> result;
-//     search_row(0, 6768528264644406733UL, 6768528264644406733UL, result);
-//     return 0;
-// }

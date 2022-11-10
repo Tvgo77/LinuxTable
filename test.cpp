@@ -15,6 +15,7 @@ struct search_row_para {
     search_row_para(vector<row> &v1) : result(v1) {}
 };
 
+// Thread encapsulate of add_row()
 void *add_row_thr(void *vargp) {
     add_row_para * args = (add_row_para*) vargp;
     add_row(args->r, args->p_attribute);
@@ -22,6 +23,7 @@ void *add_row_thr(void *vargp) {
     return NULL;
 }
 
+// Thread encapsulate of search_row()
 void *search_row_thr(void *vargp) {
     search_row_para *args = (search_row_para*) vargp;
     search_row(args->column_num, args->left_val, args->right_val, args->result);
@@ -29,6 +31,7 @@ void *search_row_thr(void *vargp) {
     return NULL;
 }
 
+// Thread encapsulate of index_construct()
 void *index_construct_thr(void *vargp) {
     int attribute_idx = *((int*) vargp);
     index_construct(attribute_idx);
@@ -36,16 +39,25 @@ void *index_construct_thr(void *vargp) {
     return NULL;
 }
 
+// Construct table file
 void test1() {
     table_construct();
 }
 
+// Normal search test, Delete index if you run this
 void test2() {
     using std::chrono::high_resolution_clock;
     using std::chrono::duration;
 
-    column left_val = 4651581685022161230UL;
-    column right_val = 4651581685022161232UL;
+    // Read a certain row
+    int fd = Open("./table/table", O_RDONLY, 0);
+    row output;
+    off_t offset = Lseek(fd, 40000000, SEEK_SET);
+    ssize_t nbytes_r = Read(fd, &output, 800);
+    Close(fd);
+
+    column left_val = output.r[0];
+    column right_val = output.r[0];
     std::vector<row> result;
 
     // Accurate normal search 
@@ -56,15 +68,23 @@ void test2() {
     return;
 }
 
+// Quick search test
 void test3() {
     using std::chrono::high_resolution_clock;
     using std::chrono::duration;
 
+    // Read a certain row
+    int fd = Open("./table/table", O_RDONLY, 0);
+    row output;
+    off_t offset = Lseek(fd, 40000000, SEEK_SET);
+    ssize_t nbytes_r = Read(fd, &output, 800);
+    Close(fd);
+
     index_construct(0);
     index_construct(2);
 
-    column left_val = 4651581685022161231UL;
-    column right_val = 4651581685022161231UL;
+    column left_val = output.r[0];
+    column right_val = output.r[0];
     std::vector<row> result;
 
     // Accurate normal search 
@@ -121,5 +141,14 @@ void test5() {
 }
 
 int main() {
-    test5();
+    init_attributes();
+    // You must run test1() to construct table file for following test
+    test1();
+
+    // Delete Index file if you run test2()
+    test2();
+    
+    // test3();
+    // test4();
+    // test5();
 }
